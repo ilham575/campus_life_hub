@@ -8,6 +8,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:campus_life_hub/pages/home.dart';
 import 'package:campus_life_hub/pages/timetable/timetable_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:campus_life_hub/services/notification_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +18,9 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform
   );
+  final notificationService = NotificationService();
+  await notificationService.initFCM();
+  FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 
   final prefs = await SharedPreferences.getInstance();
   final seenOnboarding = prefs.getBool('seenOnboarding') ?? false;
@@ -42,4 +47,9 @@ class MyApp extends StatelessWidget {
       },
     );
   }
+}
+
+Future<void> handleBackgroundMessage(RemoteMessage message) async {
+  print('Handling a background message: ${message.notification?.title}');
+  // You can handle the background message here
 }
